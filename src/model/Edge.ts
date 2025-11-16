@@ -24,6 +24,9 @@ export class Edge {
         this._source = source;
         this._target = target;
 
+        source._outEdges.push(this);
+        target._inEdges.push(this);
+        
         this.id = source.id + target.id;
     }
 

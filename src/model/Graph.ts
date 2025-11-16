@@ -19,26 +19,14 @@ export class Graph {
      * Get out edges for a given vertex
      */
     getOutEdges(vertex: Vertex): Edge[] {
-        const result: Edge[] = [];
-        for (const edge of this.edges) {
-            if (edge.getSource() == vertex) {
-                result.push(edge);
-            }
-        }
-        return result;
+        return vertex._outEdges;
     }
 
     /**
      * Get in edges for a given vertex
      */
     getInEdges(vertex: Vertex): Edge[] {
-        const result: Edge[] = [];
-        for (const edge of this.edges) {
-            if (edge.getTarget() == vertex) {
-                result.push(edge);
-            }
-        }
-        return result;
+        return vertex._inEdges;
     }
 
     /**
