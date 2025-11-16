@@ -53,7 +53,7 @@ export class RoutingService {
      */
     private visit(vertex: Vertex) {
         for (const outEdge of this.graph.getOutEdges(vertex)) {
-            const reachedVertex = outEdge.target;
+            const reachedVertex = outEdge.getTarget();
             /*
              * Test if reachedVertex is reached with a better cost.
              * (Note that the cost is POSITIVE_INFINITY for unreached vertex)
@@ -100,7 +100,7 @@ export class RoutingService {
         for (
             let current = destination.reachingEdge;
             current != null;
-            current = current.source.reachingEdge
+            current = current.getSource().reachingEdge
         ) {
             edges.push(current);
         }

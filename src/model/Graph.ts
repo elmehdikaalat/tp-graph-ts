@@ -21,7 +21,7 @@ export class Graph {
     getOutEdges(vertex: Vertex): Edge[] {
         const result: Edge[] = [];
         for (const edge of this.edges) {
-            if (edge.source == vertex) {
+            if (edge.getSource() == vertex) {
                 result.push(edge);
             }
         }
@@ -34,7 +34,7 @@ export class Graph {
     getInEdges(vertex: Vertex): Edge[] {
         const result: Edge[] = [];
         for (const edge of this.edges) {
-            if (edge.target == vertex) {
+            if (edge.getTarget() == vertex) {
                 result.push(edge);
             }
         }
