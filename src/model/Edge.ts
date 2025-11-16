@@ -10,6 +10,9 @@ export class Edge {
     private _source: Vertex;
     private _target: Vertex;
 
+    private _geometry?: LineString;
+
+
     constructor(source: Vertex, target: Vertex) {
         if (!source) {
             throw new Error("Edge: source cannot be null");
@@ -37,6 +40,10 @@ export class Edge {
     }
 
     getGeometry(): LineString {
+        if (this._geometry) {
+            return this._geometry;
+        }
+
         return {
             type: "LineString",
             coordinates: [
@@ -45,4 +52,10 @@ export class Edge {
             ]
         };
     }
+
+    setGeometry(geometry: LineString) {
+        this._geometry = geometry;
+    }
+
+    
 }
