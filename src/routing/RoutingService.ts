@@ -2,6 +2,7 @@ import { Vertex } from "../model/Vertex";
 import { Graph } from "../model/Graph";
 import { Edge } from "../model/Edge";
 import { RouteNotFound } from "../errors/RouteNotFound";
+import { PathNode } from "./PathNode";
 
 /**
  * Find routes using Dijkstra's algorithm.
@@ -10,10 +11,11 @@ import { RouteNotFound } from "../errors/RouteNotFound";
  */
 export class RoutingService {
 
-    constructor(
-        private graph: Graph
-    ) {
+    nodes: Map<Vertex, PathNode>;
 
+
+    constructor(private graph: Graph) {
+        this.nodes = new Map<Vertex, PathNode>();
     }
 
     /**
@@ -28,10 +30,10 @@ export class RoutingService {
         while ((current = this.findNextVertex()) != null) {
             this.visit(current);
 
-            // until the destination is reached...
-            if (destination.cost != Number.POSITIVE_INFINITY) {
+            if (this.getNode(destination).cost !== Number.POSITIVE_INFINITY) {
                 return this.buildRoute(destination);
             }
+
         }
 
         throw new RouteNotFound(`no route found from '${origin.id}' to '${destination.id}'`);
@@ -41,32 +43,38 @@ export class RoutingService {
      * Prepare the graph to find a route from an origin.
      */
     initGraph(origin: Vertex) {
-        for (let vertex of this.graph.vertices) {
-            vertex.cost = origin == vertex ? 0.0 : Number.POSITIVE_INFINITY;
-            vertex.reachingEdge = null;
-            vertex.visited = false;
+        this.nodes = new Map<Vertex, PathNode>();
+
+        for (const vertex of this.graph.vertices) {
+            const node = new PathNode();
+            if (vertex === origin) {
+                node.cost = 0.0;
+            }
+            this.nodes.set(vertex, node);
         }
     }
+
 
     /**
      * Explores out edges for a given vertex and try to reach vertex with a better cost.
      */
     private visit(vertex: Vertex) {
+        const currentNode = this.getNode(vertex);
+
         for (const outEdge of this.graph.getOutEdges(vertex)) {
             const reachedVertex = outEdge.getTarget();
-            /*
-             * Test if reachedVertex is reached with a better cost.
-             * (Note that the cost is POSITIVE_INFINITY for unreached vertex)
-             */
-            const newCost = vertex.cost + outEdge.getLength();
-            if (newCost < reachedVertex.cost) {
-                reachedVertex.cost = newCost;
-                reachedVertex.reachingEdge = outEdge;
+            const reachedNode = this.getNode(reachedVertex);
+
+            const newCost = currentNode.cost + outEdge.getLength();
+            if (newCost < reachedNode.cost) {
+                reachedNode.cost = newCost;
+                reachedNode.reachingEdge = outEdge;
             }
         }
-        // mark vertex as visited
-        vertex.visited = true;
+
+        currentNode.visited = true;
     }
+
 
     /**
      * Find the next vertex to visit. With Dijkstra's algorithm, 
@@ -74,38 +82,47 @@ export class RoutingService {
      */
     findNextVertex(): Vertex | null {
         let candidate: Vertex | null = null;
+
         for (const vertex of this.graph.vertices) {
-            // already visited?
-            if (vertex.visited) {
-                continue;
-            }
-            // not reached?
-            if (vertex.cost == Number.POSITIVE_INFINITY) {
-                continue;
-            }
-            // nearest from origin?
-            if (candidate == null || vertex.cost < candidate.cost) {
+            const node = this.getNode(vertex);
+
+            if (node.visited) continue;
+            if (node.cost === Number.POSITIVE_INFINITY) continue;
+
+            if (!candidate || node.cost < this.getNode(candidate).cost) {
                 candidate = vertex;
             }
+
         }
+
         return candidate;
     }
+
 
     /**
      * Build route to the reached destination.
      */
     private buildRoute(destination: Vertex): Edge[] {
         const edges: Edge[] = [];
+        let currentEdge = this.getNode(destination).reachingEdge;
 
-        for (
-            let current = destination.reachingEdge;
-            current != null;
-            current = current.getSource().reachingEdge
-        ) {
-            edges.push(current);
+        while (currentEdge != null) {
+            edges.push(currentEdge);
+            const source = currentEdge.getSource();
+            currentEdge = this.getNode(source).reachingEdge;
         }
 
         return edges.reverse();
     }
+
+
+    private getNode(vertex: Vertex): PathNode {
+        const node = this.nodes.get(vertex);
+        if (!node) {
+            throw new Error("PathNode not found for vertex " + vertex.id);
+        }
+        return node;
+    }
+
 
 }
