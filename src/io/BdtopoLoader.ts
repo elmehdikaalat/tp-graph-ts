@@ -32,14 +32,11 @@ export class BdtopoLoader {
             /* split edge creating direct and reverse way */
             const allowedDirection = feature.properties.sens_de_circulation;
             if (allowedDirection == "Double sens" || allowedDirection == "Sens direct") {
-                const directEdge = new Edge(startVertex, endVertex);
-                directEdge.id = feature.properties.cleabs_ge + '-direct';
-                g.edges.push(directEdge);
+                g.createEdge(startVertex, endVertex, feature.properties.cleabs_ge + "-direct");
+
             }
             if (allowedDirection == "Double sens" || allowedDirection == "Sens inverse") {
-                const reverseEdge = new Edge(endVertex, startVertex);
-                reverseEdge.id = feature.properties.cleabs_ge + '-reverse';
-                g.edges.push(reverseEdge);
+                g.createEdge(endVertex, startVertex, feature.properties.cleabs_ge + "-reverse");
             }
         }
         return g;

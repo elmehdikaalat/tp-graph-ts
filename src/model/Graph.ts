@@ -80,4 +80,18 @@ export class Graph {
         }
     }
 
+    createVertex(coordinate: Coordinate, id: string): Vertex {
+        const v = new Vertex();
+        v.id = id;
+        v.coordinate = coordinate;
+        this.vertices.push(v);
+        return v;
+    }
+
+    createEdge(source: Vertex, target: Vertex, id: string): Edge {
+        const e = new Edge(source, target);
+        e.id = id;
+        this.edges.push(e);
+        return e;
+    }
 }
